@@ -1,0 +1,12 @@
+temperature_csv: data/balearic_temperature_raw.csv
+site:
+  name: Palma de Mallorca
+  latitude: 39.5696
+  longitude: 2.6502
+start: 2011-01-01        # only used on a cold start
+chunk_years: 5
+past_days: 14            # recent window re-fetched each run
+forecast_days: 7         # must cover the target day
+logger:
+  level: INFO
+  serialize: false

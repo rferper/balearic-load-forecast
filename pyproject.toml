@@ -1,21 +1,113 @@
 [project]
 name = "balearic-load-forecast"
 version = "0.1.0"
-description = "Add your description here"
+description = "Day-ahead hourly electricity demand forecasting for the Balearic electric system."
 readme = "README.md"
+license = "MIT"
 authors = [
     { name = "rferper", email = "raquelfernandezperalta@gmail.com" }
 ]
 requires-python = ">=3.14"
 dependencies = [
+    "holidays>=0.103",
+    "lightgbm>=4.7.0",
+    "loguru>=0.7.3",
     "matplotlib>=3.11.1",
+    "omegaconf>=2.3.0",
     "pandas>=3.0.5",
+    "pydantic>=2.12.0",
     "requests>=2.34.2",
+    # lightgbm.sklearn (LGBMRegressor) refuses to import without it.
+    "scikit-learn>=1.7.0",
 ]
 
 [project.scripts]
-balearic-load-forecast = "balearic_load_forecast:main"
+balearic-load-forecast = "balearic_load_forecast.scripts:main"
+
+[project.urls]
+Repository = "https://github.com/rferper/balearic-load-forecast"
 
 [build-system]
 requires = ["uv_build>=0.12.5,<0.13.0"]
 build-backend = "uv_build"
+
+[dependency-groups]
+dev = [
+    "numpy>=2.5.0",
+    "pytest>=9.0.0",
+    "pytest-cov>=7.0.0",
+    "ruff>=0.16.0",
+    "ty>=0.0.69,<0.1",
+]
+
+# -- Testing -----------------------------------------------------------------
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+addopts = "--cov=src/balearic_load_forecast --cov-report=term-missing --cov-fail-under=95"
+filterwarnings = ["error::DeprecationWarning"]
+
+[tool.coverage.report]
+exclude_also = ["if __name__ == .__main__.:", "raise NotImplementedError"]
+
+# -- Linting & formatting ----------------------------------------------------
+
+[tool.ruff]
+line-length = 88
+target-version = "py314"
+src = ["src", "tests"]
+# Notebooks are exploratory by contract. Ruff formats .ipynb cells by default,
+# which churns them on every run for no benefit; promote code to `src/` before
+# holding it to the house style.
+extend-exclude = ["notebooks"]
+
+[tool.ruff.lint]
+# Explicit select list: Ruff 0.16 expanded the default set from 59 to 413
+# rules, so relying on the default would change behaviour on upgrade.
+select = [
+    "A",    # builtin shadowing
+    "ANN",  # missing annotations
+    "B",    # bugbear
+    "C4",   # comprehensions
+    "D",    # docstrings
+    "E",    # pycodestyle errors
+    "F",    # pyflakes
+    "I",    # import sorting
+    "N",    # pep8 naming
+    "PD",   # pandas-vet
+    "PT",   # pytest style
+    "PTH",  # use pathlib
+    "RUF",  # ruff-specific
+    "S",    # flake8-bandit (security)
+    "SIM",  # simplify
+    "T20",  # no print in library code
+    "UP",   # pyupgrade
+    "W",    # pycodestyle warnings
+]
+ignore = [
+    "D203", # conflicts with D211 (no blank line before class docstring)
+    "D213", # conflicts with D212 (summary on the first line)
+]
+
+[tool.ruff.lint.per-file-ignores]
+# Tests assert, take untyped pytest fixtures, and are named to be read as
+# sentences. Annotating a `tmp_path` parameter proves nothing.
+"tests/**" = ["ANN", "D100", "D103", "S101"]
+
+[tool.ruff.lint.pydocstyle]
+convention = "google"
+
+[tool.ruff.lint.flake8-annotations]
+suppress-none-returning = false
+
+# -- Typing ------------------------------------------------------------------
+
+[tool.ty.src]
+include = ["src", "tests"]
+
+[tool.ty.rules]
+# lightgbm, holidays and matplotlib ship no or partial type information;
+# ty cannot resolve their attributes, so these two categories are noise
+# rather than signal. Everything else stays on.
+unresolved-import = "ignore"
+unresolved-attribute = "ignore"

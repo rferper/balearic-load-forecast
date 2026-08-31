@@ -216,3 +216,12 @@ __marimo__/
 
 # Streamlit
 .streamlit/secrets.toml
+
+# --- balearic-load-forecast ---------------------------------------------
+# Generated artefacts: models, stored forecasts and figures. All reproducible
+# from data + config, so none of them are committed.
+outputs/
+
+# data/balearic_demand_raw.csv is deliberately tracked: it is the pinned input
+# every metric in the README was measured on. `mise run backfill` appends to
+# it, so expect it in a diff after a run.

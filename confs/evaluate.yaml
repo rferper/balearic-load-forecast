@@ -1,0 +1,9 @@
+raw_csv: data/balearic_demand_raw.csv
+forecasts_dir: outputs/forecasts
+scores_path: outputs/scores/accuracy.csv
+metrics_path: outputs/models/metrics.json
+recent_days: 7
+drift_tolerance: 1.5     # warn above this multiple of the validation MAE
+logger:
+  level: INFO
+  serialize: false
