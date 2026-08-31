@@ -1,0 +1,13 @@
+raw_csv: data/balearic_demand_raw.csv
+temperature_csv: data/balearic_temperature_raw.csv   # null disables weather features
+model_path: outputs/models/lgbm.pkl
+metrics_path: outputs/models/metrics.json
+validation_days: 90
+model:
+  n_estimators: 600
+  learning_rate: 0.05
+  num_leaves: 63
+  random_state: 0
+logger:
+  level: INFO
+  serialize: false

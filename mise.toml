@@ -1,0 +1,89 @@
+#:schema https://mise.jdx.dev/schema/mise.json
+# The task vocabulary. Every check runs the same way locally, in a git hook,
+# and in CI - so a green run here means the same thing everywhere.
+
+[tools]
+python = "3.14"
+uv = "latest"
+
+[env]
+_.python.venv = { path = ".venv", create = true }
+
+# -- Gates --------------------------------------------------------------------
+
+[tasks.format]
+description = "Rewrite the tree into canonical form"
+run = ["uv run ruff format .", "uv run ruff check --fix ."]
+
+[tasks."check:format"]
+description = "Files and the lockfile are canonical"
+run = ["uv run ruff format --check .", "uv lock --check"]
+
+[tasks."check:lint"]
+description = "No lint violation, including the security rules"
+run = "uv run ruff check ."
+
+[tasks."check:types"]
+description = "Type annotations are consistent"
+run = "uv run ty check"
+
+[tasks."check:vuln"]
+description = "No known CVE in the resolved dependencies"
+run = "uv run --with pip-audit pip-audit --skip-editable"
+
+[tasks.check]
+description = "Every static gate, in parallel"
+depends = ["check:format", "check:lint", "check:types", "check:vuln"]
+
+[tasks.test]
+description = "Behaviour is covered and correct"
+run = "uv run pytest"
+
+[tasks.build]
+description = "The package builds as a wheel"
+run = "uv build"
+
+[tasks.all]
+description = "The only gate anyone needs to remember"
+depends = ["format", "check", "test", "build"]
+depends_post = []
+
+# -- Pipeline -----------------------------------------------------------------
+
+[tasks.backfill]
+description = "Download demand history from the REE API"
+run = "uv run python -m balearic_load_forecast backfill"
+
+[tasks.train]
+description = "Fit the model and score it against the baseline"
+run = "uv run python -m balearic_load_forecast train"
+
+[tasks.predict]
+description = "Forecast tomorrow and store it"
+run = "uv run python -m balearic_load_forecast predict"
+
+[tasks.visualize]
+description = "Plot the newest stored forecast"
+run = "uv run python -m balearic_load_forecast visualize"
+
+[tasks.evaluate]
+description = "Score stored forecasts against actual demand"
+run = "uv run python -m balearic_load_forecast evaluate"
+
+[tasks.weather]
+description = "Refresh temperature history and the days-ahead forecast"
+run = "uv run python -m balearic_load_forecast weather"
+
+[tasks.daily]
+description = "The daily loop: fresh data in, tomorrow's forecast out, yesterday's scored"
+run = [
+    "uv run python -m balearic_load_forecast backfill",
+    "uv run python -m balearic_load_forecast weather",
+    "uv run python -m balearic_load_forecast predict",
+    "uv run python -m balearic_load_forecast evaluate",
+    "uv run python -m balearic_load_forecast visualize",
+]
+
+[tasks.retrain]
+description = "Refit the model. Weekly is plenty - see README."
+run = "uv run python -m balearic_load_forecast train"

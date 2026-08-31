@@ -1,0 +1,9 @@
+raw_csv: data/balearic_demand_raw.csv
+forecasts_dir: outputs/forecasts
+figures_dir: outputs/figures
+target_day: null         # null = newest stored forecast
+history_days: 14
+dpi: 150
+logger:
+  level: INFO
+  serialize: false

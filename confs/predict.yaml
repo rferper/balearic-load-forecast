@@ -1,0 +1,8 @@
+raw_csv: data/balearic_demand_raw.csv
+temperature_csv: data/balearic_temperature_raw.csv
+model_path: outputs/models/lgbm.pkl
+forecasts_dir: outputs/forecasts
+target_day: null         # null = tomorrow
+logger:
+  level: INFO
+  serialize: false

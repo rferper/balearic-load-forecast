@@ -1,0 +1,7 @@
+raw_csv: data/balearic_demand_raw.csv
+start: 2011-01-01        # only used on a cold start
+chunk_days: 27           # REE rejects wider hourly ranges
+pause_seconds: 0.5
+logger:
+  level: INFO
+  serialize: false
